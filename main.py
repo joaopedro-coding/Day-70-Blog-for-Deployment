@@ -47,7 +47,15 @@ def admin(func):
 # CREATE DATABASE
 class Base(DeclarativeBase):
     pass
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DB_URI", 'sqlite:///posts.db')
+
+db_url = os.environ.get("DATABASE_URL") or os.environ.get("DB_URI", "sqlite:///posts.db")
+
+# 4. Corrige o bug do postgres:// para versões novas do SQLAlchemy
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
